@@ -1,0 +1,43 @@
+{
+    "name": "indexeddb",
+    "version": "1.0.0",
+    "description": "A little experiment to make a library that allow you to use indexedDB as storage source for your front-end app",
+    "main": "index.js",
+    "scripts": {
+        "test": "npm test"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/sagrath23/indexedDB.git"
+    },
+    "keywords": [
+        "indexedDB",
+        "Typescript"
+    ],
+    "author": "Steven Augusto Villegas Castellanos",
+    "license": "MIT",
+    "bugs": {
+        "url": "https://github.com/sagrath23/indexedDB/issues"
+    },
+    "dependencies": {
+        "rx": "^4.1.0",
+        "rxjs": "^5.5.2"
+    },
+    "devDependencies": {
+        "@types/jasmine": "~2.5.53",
+        "@types/jasminewd2": "~2.0.2",
+        "@types/node": "~6.0.60",
+        "jasmine-core": "~2.6.2",
+        "jasmine-spec-reporter": "~4.1.0",
+        "karma": "~1.7.0",
+        "karma-chrome-launcher": "~2.1.1",
+        "karma-cli": "~1.0.1",
+        "karma-coverage-istanbul-reporter": "^1.2.1",
+        "karma-jasmine": "~1.1.0",
+        "karma-jasmine-html-reporter": "^0.2.2",
+        "ts-node": "~3.2.0",
+        "tslint": "~5.3.2",
+        "typescript": "~2.3.3"
+    },
+    "homepage": "https://github.com/sagrath23/indexedDB#readme"
+}
