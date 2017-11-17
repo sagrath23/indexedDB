@@ -18,56 +18,20 @@ describe("IndexedDBStorage: Class", () => {
     try {
       const page = await browser.newPage()
 
-      await page.addScriptTag({path: "./proj/tslib.js"})
-
-      const store = init()
-
-      // await page.evaluate(async (store) => {
-      //   await store.init()
-      // }, store)
+      //to pass __awaiter function
+      await page.addScriptTag({path: "./tslib.js", content: "text/javascript"})
+      //to pass IndexedDB Class definition
+      await page.addScriptTag({path: "./bundle.js", content: "text/javascript"})
 
       // tslint:disable-next-line:only-arrow-functions
-      await page.evaluate(async function(store) {
+      const store = await page.evaluate(async function() {
+        const store = new IndexedDBStorage("idbTest")
         await store.init()
-      }, store)
+        return store
+      })
 
-      console.log(store)
-
-      // const result = await page.evaluate(function() {
-      //   return __awaiter
-      // })
-
-      // console.log("awaiter", result)
-
-      // const storage = init()
-      // const initializedStorage = await page.evaluate(
-      //   async function (storageObject) {
-      //     console.log(storageObject)
-      //     await storageObject.init()
-      //     return 45
-      //   }, storage)
-
-      // console.log(initializedStorage)
-
-      // class A {
-      //   public a() {
-      //     return 2 + 3
-      //   }
-      // }
-
-      // await page.exposeFunction("mamamia", () => new A().a())
-
-      // const x = new A()
-
-      // const storage = init()
-      // const initializedStorage = await page.evaluate(() => {
-      //   return mamamia()
-      // })
-
-      // console.log(initializedStorage)
-
-      // expect(storage).toBeDefined()
-      // expect(storage.getStorage()).toBeDefined()
+      expect(store).toBeDefined()
+      expect(store.getStorage()).toBeDefined()
 
       await browser.close()
       done()

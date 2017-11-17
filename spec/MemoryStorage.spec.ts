@@ -91,4 +91,11 @@ describe("MemoryStorage: Class", () => {
     expect(storage.key(1)).toEqual(key2)
   }))
 
+  it("should return a empty string when a key is not found in a specific position", (() => {
+    const storage = init()
+    storage.setItem(key1, value1)
+    storage.setItem(key2, value2)
+    expect(storage.key(3)).toEqual("")
+  }))
+
 })
