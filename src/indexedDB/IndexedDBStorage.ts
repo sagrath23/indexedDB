@@ -7,7 +7,7 @@ export class IndexedDBStorage implements IAsyncStorage {
     private readonly storageName: string
     private readonly version: number = 1
 
-    constructor(storageName?: string) {
+    constructor(storageName: string) {
         this.storageName = storageName
     }
 
@@ -15,8 +15,10 @@ export class IndexedDBStorage implements IAsyncStorage {
         this.storage = await this.open()
     }
 
-    public async open(): Object {
-        return await window.indexedDB.open(this.storageName, this.version)
+    public open(): Promise<IDBOpenDBRequest> {
+        return new Promise((resolve, reject) => {
+            resolve(window.indexedDB.open(this.storageName, this.version))
+        })
     }
 
     public clear(): void {

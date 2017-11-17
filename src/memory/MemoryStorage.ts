@@ -6,7 +6,7 @@ export class MemoryStorage implements ISyncStorage {
     private storage: Object
     private readonly storageName: string
 
-    constructor(name?: string) {
+    constructor(name: string) {
         this.storage = {}
         this.storageName = name
     }
