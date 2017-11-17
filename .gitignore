@@ -1,4 +1,5 @@
 node_modules
 tslib.js
 bundle.js
+index.html
 coverage

@@ -13,7 +13,7 @@ describe("IndexedDBStorage: Class", () => {
   const value2 = "value2"
 
   fit("should create empty storage", (async (done) => {
-    const browser = await puppeteer.launch()
+    const browser = await puppeteer.launch({args: ['--allow-file-access-from-files']})
 
     try {
       const page = await browser.newPage()
@@ -25,7 +25,7 @@ describe("IndexedDBStorage: Class", () => {
 
       // tslint:disable-next-line:only-arrow-functions
       const store = await page.evaluate(async function() {
-        const store = new IndexedDBStorage("idbTest")
+        const store = eval("new IndexedDBStorage.IndexedDBStorage(\"idbTest\")")
         await store.init()
         return store
       })

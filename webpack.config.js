@@ -10,12 +10,13 @@ var exports = {
         // bundle the client for hot reloading
         // only- means to only hot reload for successful updates
 
-        './src/index.ts',
+        './src/indexedDB/IndexedDBStorage.ts',
         // the entry point of our app
     ],
     output: {
         filename: 'bundle.js',
         path: __dirname,
+        library: 'IndexedDBStorage',
 
         publicPath: '/'
             // necessary for HMR to know where to load the hot update chunks
