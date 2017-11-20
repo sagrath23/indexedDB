@@ -1,5 +1,6 @@
 // required to get window.indexedDB object
 import * as puppeteer from "puppeteer"
+import * as fs from "fs-js"
 
 // tslint:disable-next-line:no-var-requires
 // const tslib = require("../tslib.js")
@@ -12,7 +13,7 @@ describe("IndexedDBStorage: Class", () => {
   const value1 = "value1"
   const value2 = "value2"
 
-  fit("should create empty storage", (async (done) => {
+  xit("should create empty storage", (async (done) => {
     const browser = await puppeteer.launch({args: ['--allow-file-access-from-files']})
 
     try {
@@ -23,13 +24,29 @@ describe("IndexedDBStorage: Class", () => {
       //to pass IndexedDB Class definition
       await page.addScriptTag({path: "./bundle.js", content: "text/javascript"})
 
-      // tslint:disable-next-line:only-arrow-functions
-      const store = await page.evaluate(async function() {
-        const store = eval("new IndexedDBStorage.IndexedDBStorage(\"idbTest\")")
-        await store.init()
-        return store
-      })
+      //load external file to evaluate
+      const externalFile = fs.readFileSync('./spec/buildStorage.js', 'utf8');
+      const store = await page.evaluate(externalFile);
 
+      // const store = await page.evaluate(async function() {
+      //   const store = new IndexedDBStorage.IndexedDBStorage('testDB')
+      //   await store.init()
+      //   return store
+      // })
+
+      // const loadFunction = function(){
+      //   var store = new IndexedDBStorage.IndexedDBStorage("testDB");
+      //   var promise = store.init();
+
+      //   promise.then(function(store){
+      //     return store;
+      //   }).catch(function(error){
+      //     console.log(error);
+      //   })
+      // }
+
+      // const store = await page.evaluate(loadFunction)
+      
       expect(store).toBeDefined()
       expect(store.getStorage()).toBeDefined()
 
