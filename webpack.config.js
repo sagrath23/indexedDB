@@ -2,15 +2,7 @@ var webpack = require("webpack")
 
 var exports = {
     entry: [
-        'webpack-dev-server/client?http://localhost:8080',
-        // bundle the client for webpack-dev-server
-        // and connect to the provided endpoint
-
-        'webpack/hot/only-dev-server',
-        // bundle the client for hot reloading
-        // only- means to only hot reload for successful updates
-
-        './src/indexedDB/IndexedDBStorage.ts',
+        './src/index.js',
         // the entry point of our app
     ],
     output: {
@@ -23,17 +15,6 @@ var exports = {
     },
 
     devtool: "inline-source-map",
-
-    devServer: {
-        hot: true,
-        // enable HMR on the server
-
-        contentBase: __dirname,
-        // match the output path
-
-        publicPath: '/'
-            // match the output `publicPath`
-    },
 
     resolve: {
         // Add '.ts' and '.tsx' as resolvable extensions.

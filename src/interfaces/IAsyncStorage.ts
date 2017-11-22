@@ -4,8 +4,6 @@ export interface IAsyncStorage {
 
     // Clear/remove all data in the storage
     clear(): void
-    // open connection
-    open(): void
     // get an element into the storage
     // tslint:disable-next-line:ban-types
     getItem(key: string): Object

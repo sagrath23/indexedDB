@@ -3,6 +3,7 @@ import { IAsyncStorage } from "../interfaces/IAsyncStorage"
 export class IndexedDBStorage implements IAsyncStorage {
     // tslint:disable-next-line:ban-types
     private storage: IDBDatabase
+    private objectStore: IDBObjectStore
     private readonly storageName: string
     private readonly version: number = 1
 
@@ -24,12 +25,23 @@ export class IndexedDBStorage implements IAsyncStorage {
     /**
      * Function that open a new instance of the database, using a Promise
      */
-    public open(): Promise<IDBDatabase> {
+    private open(): Promise<IDBDatabase> {
+        const me = this
         return new Promise((resolve, reject) => {
-            const request = window.indexedDB.open(this.storageName, this.version);
+            const request = window.indexedDB.open(this.storageName, this.version)
+
+            //resolve the promise with IDBDatabase object 
             request.onsuccess = function(event){
                 resolve(this.result)
             }
+            /* TODO: check implementation of this behavior */
+            request.onupgradeneeded = function(event) {
+                //create an objectStore to handle object for this version of database
+                me.objectStore = this.result.createObjectStore(me.storageName, { keyPath: "id"})
+
+                resolve(this.result)
+            }
+            // if an error happened, reject the promise
             request.onerror = function(event){
                 reject(event)
             }
@@ -44,6 +56,12 @@ export class IndexedDBStorage implements IAsyncStorage {
     private getObjectStore(storageName: string, mode: IDBTransactionMode): IDBObjectStore {
         const transaction:IDBTransaction = this.storage.transaction(storageName, mode)
         return transaction.objectStore(storageName)
+    }
+
+    public createStoreIndex(indexName: string, keyPath: string|string[]) {
+        if(this.objectStore){
+            this.objectStore.createIndex(indexName, keyPath)
+        }
     }
 
     /**
@@ -69,7 +87,11 @@ export class IndexedDBStorage implements IAsyncStorage {
      * public interface to clear indexedDBStorage
      */
     public async clear() {
-        await this.clearObjectStore(this.storageName, 'readwrite')
+        try{
+            await this.clearObjectStore(this.storageName, 'readwrite')
+        } catch(error) {
+            console.warn(error)
+        }
     }
 
     public key(position: number): string {
