@@ -25,14 +25,14 @@ describe("IndexedDBStorage: Class", () => {
       await page.addScriptTag({path: "./bundle.js", content: "text/javascript"})
 
       //load external file to evaluate
-      const externalFile = fs.readFileSync('./spec/buildStorage.js', 'utf8');
-      const store = await page.evaluate(externalFile);
+      //const externalFile = fs.readFileSync('./spec/buildStorage.js', 'utf8');
+      //const store = await page.evaluate(externalFile);
 
-      // const store = await page.evaluate(async function() {
-      //   const store = new IndexedDBStorage.IndexedDBStorage('testDB')
-      //   await store.init()
-      //   return store
-      // })
+      const store = await page.evaluate(async function() {
+        const store = new IndexedDBStorage({databaseName: "testIDBDatabase", databaseVersion: 1,usingKeyPath: false,usingKeyGenerator: false})
+        await store.init()
+        return store
+      })
 
       // const loadFunction = function(){
       //   var store = new IndexedDBStorage.IndexedDBStorage("testDB");
@@ -158,6 +158,6 @@ describe("IndexedDBStorage: Class", () => {
 })
 
 function init(): IndexedDBStorage {
-  const storage = new IndexedDBStorage("testStorage")
+  const storage = new IndexedDBStorage({databaseName: "testIDBDatabase", databaseVersion: 1,usingKeyPath: false,usingKeyGenerator: false})
   return storage
 }
