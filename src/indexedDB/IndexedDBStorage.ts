@@ -1,151 +1,121 @@
 import { IAsyncStorage } from "../interfaces/IAsyncStorage"
-
-export interface IDBDatabaseSettings {
-    databaseName: string,
-    databaseVersion: number,
-    readonly usingKeyPath: boolean,
-    usingKeyGenerator: boolean
+//interface to create an index in an objectStore
+interface IIndexDB {
+    indexName: string,
+    keyPath: string| string[],
+    optionalParams: Object
 }
-export class IndexedDBStorage implements IAsyncStorage {
 
-    private databaseSettings: IDBDatabaseSettings
+interface IObjectStoreSpec {
+    objectStoreName: string,
+    objectStoreSettings: IDBObjectStoreParameters
+    objectStoreIndexes?: IIndexDB | IIndexDB[]
+}
+
+const READ_ONLY = 'readonly'
+const READ_WRITE = 'readwrite'
+const VERSION_CHANGE = 'versionchange'
+export class IndexedDBStorage {
+
+    private databaseName: string
+    private databaseVersion: number
     private database: IDBDatabase
-    private objectStore: IDBObjectStore
-
-    constructor(databaseSettings: IDBDatabaseSettings) {
-        this.databaseSettings = databaseSettings
-    }
+    private objectStores: Object
+    private objectStoreSpec: IObjectStoreSpec | IObjectStoreSpec[]
 
     /**
-     * Function used to generate a new instance of IDBDatabase, to store all data
+     * Class constructor
+     * @param databaseSettings 
      */
-    public async init() {
-        this.database = await this.open()
+    constructor() {
     }
 
-    /**
-     * Function that open a new instance of the database, using a Promise
-     */
-    private open(): Promise<IDBDatabase> {
+    public async openIDB(databaseName: string, databaseVersion: number, objectStoreSpec: IObjectStoreSpec | IObjectStoreSpec[]){
         const me = this
-        return new Promise((resolve, reject) => {
-            // open an IndexedDB instance
-            const request = window.indexedDB.open(this.databaseSettings.databaseName, this.databaseSettings.databaseVersion)
-            
-            // this callback is executed when the database exists an it's opened
-            // if the database doesn't exist, then execute onupgradeneeded callback first, and this later
-            request.onsuccess = function(event) {
-                console.info("Database is Open")
-                resolve(this.result)
-            }
-
-            // this callback is executed when the database is open
-            request.onblocked = function(event) {
-                console.warn("Database is opened")
-                reject(event)
-            }
-
-            // this callback is executed, when a new Database is created
-            request.onupgradeneeded = function(event) {
-                console.info("Database successfully created")
-                resolve(this.result)
-            }
-            // if an error happened, reject the promise
-            request.onerror = function(event){
-                console.error("Database couldn't be opened")
-                reject(event)
-            }
-        })
+        console.log("start to open the IDB...", "IndexedDBStorage.openIDB")
+        await this.openIndexedDB(databaseName, databaseVersion, objectStoreSpec)
     }
 
-    public async createDatabaseTable(objectStoreName: string, indexObject: IDBKeyPath | IDBKeyRange ){
-        if(this.databaseSettings.usingKeyPath){
-            //create an objectStore using a keyPath to 
-            await this.createObjectStore(objectStoreName, indexObject)
+    private openIndexedDB(databaseName: string, databaseVersion: number, objectStoreSpec: IObjectStoreSpec | IObjectStoreSpec[]): Promise<IDBDatabase>{
+        const me = this
+        let databaseCreated = false
+
+        me.databaseName = databaseName
+        me.databaseVersion = databaseVersion
+
+        me.objectStoreSpec = objectStoreSpec
+
+        console.log("creating promise...", "IndexedDBStorage.openIndexedDB")
+        return new Promise(me.promiseHandler)
+    }
+
+    private promiseHandler(resolve:Function, reject: Function) {
+        const me = this
+        let databaseCreated = false
+
+        console.log("opening IDB Database...", "IndexedDBStorage.promiseHandler ")
+        //start to open the database
+        const request = window.indexedDB.open(me.databaseName, me.databaseVersion)
+        
+        // this callback is executed, when a new Database is created
+        request.onupgradeneeded = function(event) {
+            databaseCreated = true
+            me.database = this.result
+            console.info("Database successfully created")
+            //now, create a objectStore object
+            for(const i in me.objectStoreSpec) {
+                me.createObjectStore(this.result, me.objectStoreSpec[i]);
+            }
+            resolve(this.result)
         }
-    }
 
-    private createObjectStore(objectStoreName: string, indexObject: IDBKeyPath | IDBKeyRange): Promise<IDBObjectStore> {
-        return new Promise((resolve,reject) => {
-
-        })
-    }
-
-    /**
-     * Function that return an object Store to execute all operations
-     * @param storageName 
-     * @param mode 
-     */
-    private getObjectStore(storageName: string, mode: IDBTransactionMode): IDBObjectStore {
-        const transaction:IDBTransaction = this.database.transaction(storageName, mode)
-        return transaction.objectStore(storageName)
-    }
-
-    public createStoreIndex(indexName: string, keyPath: string|string[]) {
-        if(this.objectStore){
-            this.objectStore.createIndex(indexName, keyPath)
+        // this callback is executed when the database exists an it's opened
+        // if the database doesn't exist, then execute onupgradeneeded callback first, and this later
+        request.onsuccess = function(event) {
+            console.info("Database is Open")
+            if(!databaseCreated){
+                me.database = this.result
+                //if database exist in window, then load objectStores to our objectStores Object
+                for(const i in me.objectStoreSpec) {
+                    me.objectStores[me.objectStoreSpec[i].objectStoreName] = me.getObjectStore(me.objectStoreSpec[i]);
+                }
+            }
+            resolve(this.result)
         }
-    }
 
-    /**
-     * Function that clear objectStore, in async mode
-     * @param storageName 
-     * @param mode 
-     */
-    private clearObjectStore(storageName: string, mode: IDBTransactionMode) {
-        const store = this.getObjectStore(this.databaseSettings.databaseName,'readwrite')
-        return new Promise((resolve,reject) =>{
-            const request = store.clear()
-            request.onsuccess = function(event){
-                resolve(event)
-            }
+        // this callback is executed when the database is open
+        request.onblocked = function(event) {
+            console.warn("Database is opened")
+            reject(event)
+        }
 
-            request.onerror = function(error){
-                reject(error)
-            }
-        })
+        // if an error happened, reject the promise
+        request.onerror = function(event){
+            console.error("Database couldn't be opened")
+            reject(event)
+        }
     }
     
-    /**
-     * public interface to clear indexedDBStorage
-     */
-    public async clear() {
-        try{
-            await this.clearObjectStore(this.databaseSettings.databaseName, 'readwrite')
-        } catch(error) {
-            console.warn(error)
+    private createObjectStore(database: IDBDatabase, objectStoreSpec: IObjectStoreSpec){
+        console.log("creating objectStore "+objectStoreSpec.objectStoreName, "IndexedDBStorage.createObjectStore")
+        //create objectStore
+        const objectStore = database.createObjectStore(objectStoreSpec.objectStoreName,objectStoreSpec.objectStoreSettings)
+        //and create index if are defined
+        if(objectStoreSpec.objectStoreIndexes){
+            for (const i in objectStoreSpec.objectStoreIndexes) {
+                //create index
+                console.log("creating index "+objectStoreSpec.objectStoreIndexes[i].indexName+" for objectStore "+objectStoreSpec.objectStoreName, "IndexedDBStorage.createObjectStore")
+                objectStore.createIndex(objectStoreSpec.objectStoreIndexes[i].indexName, objectStoreSpec.objectStoreIndexes[i].keyPath, objectStoreSpec.objectStoreIndexes[i].optionalParams)
+            }
         }
+        //and add the new objectStore to our objectStores object
+        this.objectStores[objectStoreSpec.objectStoreName] = objectStore
     }
 
-    public key(position: number): string {
-        throw new Error("Method not implemented")
-    }
-
-    public removeItem(key: string): void {
-        throw new Error("Method not implemented")
-    }
-
-    // tslint:disable-next-line:ban-types
-    public setItem(key: string, value: Object): void {
-        throw new Error("Method not implemented")
-    }
-
-    // tslint:disable-next-line:ban-types
-    public getItem(key: string): Object {
-        throw new Error("Method not implemented")
-    }
-
-    // tslint:disable-next-line:ban-types
-    public getDenseBatch(keys: string[]): Object[] {
-        throw new Error("Method not implemented")
-    }
-
-    // tslint:disable-next-line:ban-types
-    public getAll(): Object[] {
-        throw new Error("Method not implemented")
-    }
-
-    public getStorage(): Object {
-        return this.database
+    private getObjectStore(objectStoreSpec: IObjectStoreSpec): IDBObjectStore{
+        //create a transaction in the database
+        const transaction = this.database.transaction(this.databaseName, READ_WRITE)
+        //and return the objectStore specified
+        return transaction.objectStore(objectStoreSpec.objectStoreName)
     }
 }
