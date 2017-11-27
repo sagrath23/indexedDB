@@ -79,7 +79,6 @@ export class IndexedDBStorage {
                 reject(event)
             }
         })
-        //return new Promise(this.promiseHandler)
     }
 
     /**
@@ -164,6 +163,12 @@ export class IndexedDBStorage {
         await this.openIndexedDB(databaseName, databaseVersion, objectStoreSpec)
     }
 
+    /**
+     * Function that add an element in a specific objectStore 
+     * in the database handled by one instance of this class
+     * @param objectStoreName 
+     * @param item 
+     */
     public async add(objectStoreName: string, item: any){
         try{
             await this.addItemToObjectStore(objectStoreName, item)
