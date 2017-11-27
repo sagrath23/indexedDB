@@ -10,6 +10,7 @@
             "es2015"
         ],
         "skipLibCheck": true,
+        "strictNullChecks": false,
         "strict": true,
         "noImplicitAny": false
     },

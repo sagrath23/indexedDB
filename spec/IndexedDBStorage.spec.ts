@@ -34,7 +34,7 @@ describe("IndexedDBStorage: Class", () => {
 
       const store = await page.evaluate(async function() {
         const store = new IndexedDBStorage()
-        await store.openIDB("testDatabase", 1, spec)
+        await store.openIDB("testDatabase", 1, [spec])
         return store
       })
       expect(store).toBeDefined()
