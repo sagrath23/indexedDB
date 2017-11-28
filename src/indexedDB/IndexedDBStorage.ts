@@ -12,9 +12,14 @@ interface IObjectStoreSpec {
     objectStoreIndexes?: IIndexDBSpec | IIndexDBSpec[]
 }
 
+//transaction modes
 const READ_ONLY = 'readonly'
 const READ_WRITE = 'readwrite'
 const VERSION_CHANGE = 'versionchange'
+//transaction types
+const ADD = 'add'
+const GET = 'get'
+const DELETE = 'delete'
 export class IndexedDBStorage {
 
     private databaseCreated: boolean
@@ -104,11 +109,11 @@ export class IndexedDBStorage {
      * Function that open an existing IDBObjectStore i the specified database
      * @param objectStoreSpec 
      */
-    private getObjectStore(objectStoreName: string): IDBObjectStore{
+    private getObjectStore(objectStoreName: string, transactionMode: IDBTransactionMode): IDBObjectStore{
         try{
             //open the object Store from IndexedDB instance
             //create a transaction in the database
-            const transaction = this.database.transaction(objectStoreName, READ_WRITE)
+            const transaction = this.database.transaction(objectStoreName, transactionMode)
             //and return the objectStore specified
             return transaction.objectStore(objectStoreName)
         } catch(error){
@@ -117,14 +122,25 @@ export class IndexedDBStorage {
         }
     }
 
-    private addItemToObjectStore(objectStoreName: string, item: any): Promise<IDBRequest> {
+    /**
+     * Function that adds an item to an specific objectStore in the opened database,
+     * returning a Promise of an IDBRequest object that contain the result of the transaction
+     * @param objectStoreName 
+     * @param item 
+     */
+    private addItemToObjectStore(objectStoreName: string, item: any, keyValue: IDBKeyRange | IDBValidKey): Promise<IDBRequest> {
         const me = this
         return new Promise((resolve,reject) => {
             //get ObjectStore to store data
-            const objectStore = me.getObjectStore(objectStoreName)
+            const objectStore = me.getObjectStore(objectStoreName, READ_WRITE)
             try{
                 //and try to add it 
-                const request = objectStore.add(item)
+                let request
+                if(keyValue){
+                    request = objectStore.add(item, keyValue)
+                } else {
+                    request = objectStore.add(item)
+                }
                 //hendling when insertion is success
                 request.onsuccess = function (event) {
                     console.log("Insertion in DB successful")
@@ -141,6 +157,66 @@ export class IndexedDBStorage {
                     console.error("This engine doesn't know how to clone a Blob, use Firefox or Chrome")
                 }
                 
+                throw error
+            }
+        })
+    }
+
+    /**
+     * 
+     * @param objectStoreName 
+     * @param keyValue 
+     */
+    private getItemFromObjectStore(objectStoreName: string, keyValue: IDBKeyRange | IDBValidKey): Promise<IDBRequest>{
+        const me = this
+        return new Promise((resolve,reject) => {
+            //get ObjectStore to store data
+            const objectStore = me.getObjectStore(objectStoreName, READ_ONLY)
+            try{
+                //and try to delete it 
+                const request = objectStore.get(keyValue)
+                //hendling when insertion is success
+                request.onsuccess = function (event) {
+                    console.log("Object "+keyValue+" deleted from "+ objectStoreName+" objectStore")
+                    resolve(this.result)
+                }
+                //and when 
+                request.onerror = function() {
+                    console.error("error trying to delete "+keyValue+" : ", this.error);
+                    reject()
+                }
+            } catch(error){
+                throw error
+            }
+        })
+    }
+
+    /**
+     * Function that delete a record in a specific objectStore using his key
+     * returning a promise of a IDBRequest object, containing the result of the request
+     * @param objectStoreName 
+     * @param keyValue 
+     */
+    private deleteItemFromObjectStore(objectStoreName: string, keyValue: IDBKeyRange | IDBValidKey): Promise<IDBRequest>{
+        const me = this
+        return new Promise((resolve,reject) => {
+            //get ObjectStore to store data
+            const objectStore = me.getObjectStore(objectStoreName, READ_WRITE)
+            try{
+                //and try to delete it 
+                const request = objectStore.delete(keyValue)
+                //hendling when insertion is success
+                request.onsuccess = function (event) {
+                    console.log("Object "+keyValue+" deleted from "+ objectStoreName+" objectStore")
+                    resolve()
+                }
+                //and when 
+                request.onerror = function() {
+                    console.error("error trying to delete "+keyValue+" : ", this.error);
+                    reject()
+                }
+
+            } catch(error){
                 throw error
             }
         })
@@ -169,9 +245,25 @@ export class IndexedDBStorage {
      * @param objectStoreName 
      * @param item 
      */
-    public async add(objectStoreName: string, item: any){
+    public async add(objectStoreName: string, item: any, keyValue?: IDBKeyRange | IDBValidKey){
         try{
-            await this.addItemToObjectStore(objectStoreName, item)
+            await this.addItemToObjectStore(objectStoreName, item, keyValue)
+        } catch(error){
+            throw error
+        }
+    }
+
+    public async get(objectStoreName: string, keyValue: IDBKeyRange | IDBValidKey) {
+        try{
+            await this.getItemFromObjectStore(objectStoreName, keyValue)
+        } catch(error){
+            throw error
+        }
+    }
+
+    public async delete(objectStoreName: string, keyValue: IDBKeyRange | IDBValidKey){
+        try{
+            await this.deleteItemFromObjectStore(objectStoreName, keyValue)
         } catch(error){
             throw error
         }
