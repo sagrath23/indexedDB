@@ -148,7 +148,7 @@ export class IndexedDBStorage {
                 }
                 //and when 
                 request.onerror = function() {
-                    console.error("addPublication error", this.error);
+                    console.error("Insertion failed", this.error);
                     reject()
                 }
 
@@ -177,14 +177,51 @@ export class IndexedDBStorage {
                 const request = objectStore.get(keyValue)
                 //hendling when insertion is success
                 request.onsuccess = function (event) {
-                    console.log("Object "+keyValue+" deleted from "+ objectStoreName+" objectStore")
+                    console.log("Object "+keyValue+" founded in "+ objectStoreName+" objectStore")
                     resolve(this.result)
                 }
                 //and when 
                 request.onerror = function() {
-                    console.error("error trying to delete "+keyValue+" : ", this.error);
+                    console.error("error trying to get "+keyValue+" : ", this.error);
                     reject()
                 }
+            } catch(error){
+                throw error
+            }
+        })
+    }
+
+    /**
+     * Function that updates an item in an specific objectStore for the opened database,
+     * returning a Promise of an IDBRequest object that contain the result of the transaction
+     * @param objectStoreName 
+     * @param item 
+     * @param keyValue 
+     */
+    private putItemToObjectStore(objectStoreName: string, item: any, keyValue: IDBKeyRange | IDBValidKey): Promise<IDBRequest> {
+        const me = this
+        return new Promise((resolve,reject) => {
+            //get ObjectStore to store data
+            const objectStore = me.getObjectStore(objectStoreName, READ_WRITE)
+            try{
+                //and try to add it 
+                let request
+                if(keyValue){
+                    request = objectStore.put(item, keyValue)
+                } else {
+                    request = objectStore.put(item)
+                }
+                //hendling when insertion is success
+                request.onsuccess = function (event) {
+                    console.log("Update in DB successful")
+                    resolve()
+                }
+                //and when 
+                request.onerror = function() {
+                    console.error("Update failed", this.error);
+                    reject()
+                }
+
             } catch(error){
                 throw error
             }
@@ -253,14 +290,35 @@ export class IndexedDBStorage {
         }
     }
 
+    /**
+     * Function that return an item contained in a specific objectStore
+     * in the database handled by one instance of this class
+     * @param objectStoreName 
+     * @param keyValue 
+     */
     public async get(objectStoreName: string, keyValue: IDBKeyRange | IDBValidKey) {
         try{
-            await this.getItemFromObjectStore(objectStoreName, keyValue)
+            const item = await this.getItemFromObjectStore(objectStoreName, keyValue)
+            return item
         } catch(error){
             throw error
         }
     }
 
+    /**
+     * Function that update an item contained in a specific objectStore
+     * in the database handled by one instance of this class
+     * @param objectStoreName 
+     * @param item 
+     */
+    public async put(objectStoreName: string, item: any, keyValue?: IDBKeyRange | IDBValidKey){
+        try{
+            await this.putItemToObjectStore(objectStoreName, item, keyValue)
+        } catch(error){
+            throw error
+        }
+    }
+    
     public async delete(objectStoreName: string, keyValue: IDBKeyRange | IDBValidKey){
         try{
             await this.deleteItemFromObjectStore(objectStoreName, keyValue)
