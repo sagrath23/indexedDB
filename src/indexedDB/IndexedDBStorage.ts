@@ -1,16 +1,5 @@
 import { IAsyncStorage } from "../interfaces/IAsyncStorage"
-//interface to create an index in an objectStore
-interface IIndexDBSpec {
-    indexName: string,
-    keyPath: string| string[],
-    optionalParams: Object
-}
-
-interface IObjectStoreSpec {
-    objectStoreName: string,
-    objectStoreSettings: IDBObjectStoreParameters
-    objectStoreIndexes?: IIndexDBSpec | IIndexDBSpec[]
-}
+import {IIndexDBSpec,IObjectStoreSpec} from "../interfaces/IObjectStoreSpec"
 
 //transaction modes
 const READ_ONLY = 'readonly'
