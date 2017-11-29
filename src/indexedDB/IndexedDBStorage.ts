@@ -9,7 +9,7 @@ const VERSION_CHANGE = 'versionchange'
 const ADD = 'add'
 const GET = 'get'
 const DELETE = 'delete'
-export class IndexedDBStorage {
+export class IndexedDBStorage implements IAsyncStorage {
 
     private databaseCreated: boolean
     private databaseName: string
@@ -98,7 +98,7 @@ export class IndexedDBStorage {
      * Function that open an existing IDBObjectStore i the specified database
      * @param objectStoreSpec 
      */
-    private getObjectStore(objectStoreName: string, transactionMode: IDBTransactionMode): IDBObjectStore{
+    private getObjectStore(objectStoreName: string, transactionMode?: IDBTransactionMode): IDBObjectStore{
         try{
             //open the object Store from IndexedDB instance
             //create a transaction in the database
@@ -249,6 +249,45 @@ export class IndexedDBStorage {
     }
 
     /**
+     * 
+     * @param objectStoreName 
+     * @param cursorRange 
+     * @param cursorDirection 
+     */
+    private openCursorInObjectStore(objectStoreName: string, cursorRange?: IDBKeyRange | IDBValidKey, cursorDirection?: IDBCursorDirection): Promise<IDBCursor>{
+        const me = this
+        return new Promise((resolve,reject)=>{
+            //get ObjectStore to store data
+            const objectStore = me.getObjectStore(objectStoreName)
+            try{
+                //and try to delete it 
+                const request = objectStore.openCursor(cursorRange, cursorDirection)
+                //hendling when insertion is success
+                request.onsuccess = function (event) {
+                    console.log("Cursor opened for "+ objectStoreName+" objectStore")
+                    resolve(this.result)
+                }
+                //and when 
+                request.onerror = function() {
+                    console.error("error trying to open a cursor in "+objectStoreName+" : ", this.error);
+                    reject()
+                }
+
+            } catch(error){
+                throw error
+            }
+        })
+
+    }
+
+    private indexInObjectStore(objectStoreName: string, keyName: string): IDBIndex{
+        const me = this
+        //get ObjectStore to store data
+        const objectStore = me.getObjectStore(objectStoreName)
+        return objectStore.index(keyName)
+    }
+
+    /**
      * Class constructor
      */
     constructor() {
@@ -285,7 +324,7 @@ export class IndexedDBStorage {
      * @param objectStoreName 
      * @param keyValue 
      */
-    public async get(objectStoreName: string, keyValue: IDBKeyRange | IDBValidKey) {
+    public async get(objectStoreName: string, keyValue: IDBKeyRange | IDBValidKey) : Promise<Object> {
         try{
             const item = await this.getItemFromObjectStore(objectStoreName, keyValue)
             return item
@@ -308,6 +347,11 @@ export class IndexedDBStorage {
         }
     }
     
+    /**
+     * 
+     * @param objectStoreName 
+     * @param keyValue 
+     */
     public async delete(objectStoreName: string, keyValue: IDBKeyRange | IDBValidKey){
         try{
             await this.deleteItemFromObjectStore(objectStoreName, keyValue)
@@ -316,4 +360,27 @@ export class IndexedDBStorage {
         }
     }
 
+    /**
+     * 
+     * @param objectStoreName 
+     * @param cursorRange 
+     * @param cursorDirection 
+     */
+    public async openCursor(objectStoreName: string, cursorRange?: IDBKeyRange | IDBValidKey, cursorDirection?: IDBCursorDirection): Promise<IDBCursor> {
+        try{
+            const cursor = await this.openCursorInObjectStore(objectStoreName, cursorRange, cursorDirection)
+            return cursor
+        } catch(error){
+            throw error
+        }
+    }
+
+    public index(objectStoreName: string, keyName: string): IDBIndex {
+        return this.indexInObjectStore(objectStoreName, keyName)
+    }
+
+    public async getItemByIndex(objectStoreName: string, keyName: string, keyValue: IDBKeyRange | IDBValidKey): Promise<Object> {
+        const index = this.index(objectStoreName, keyName)
+        return await index.get(keyValue)
+    }
 }
