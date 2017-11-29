@@ -1,6 +1,6 @@
-
+import {IObjectStoreSpec} from './IObjectStoreSpec'
 export interface IAsyncStorage {
-    /** basic Storage interface functions */
+    openIDB(databaseName: string, databaseVersion: number, objectStoreSpec: IObjectStoreSpec[])
     add(objectStoreName: string, item: any, keyValue?: IDBKeyRange | IDBValidKey)
     get(objectStoreName: string, keyValue: IDBKeyRange | IDBValidKey) : Promise<Object>
     put(objectStoreName: string, item: any, keyValue?: IDBKeyRange | IDBValidKey)

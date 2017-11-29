@@ -375,12 +375,26 @@ export class IndexedDBStorage implements IAsyncStorage {
         }
     }
 
+    /**
+     * 
+     * @param objectStoreName 
+     * @param keyName 
+     */
     public index(objectStoreName: string, keyName: string): IDBIndex {
         return this.indexInObjectStore(objectStoreName, keyName)
     }
-
+    
+    /**
+     * 
+     * @param objectStoreName 
+     * @param keyName 
+     * @param keyValue 
+     */
     public async getItemByIndex(objectStoreName: string, keyName: string, keyValue: IDBKeyRange | IDBValidKey): Promise<Object> {
         const index = this.index(objectStoreName, keyName)
         return await index.get(keyValue)
     }
+
+    //TODO: implement keyCursor Functionality
+    
 }
