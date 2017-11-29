@@ -1,7 +1,7 @@
 import {Observable} from "rxjs"
 import { ISyncStorage } from "../interfaces/ISyncStorage"
 
-export class MemoryStorage implements ISyncStorage {
+export class MemoryStorage {
     // tslint:disable-next-line:ban-types
     private storage: Object
     private readonly storageName: string
