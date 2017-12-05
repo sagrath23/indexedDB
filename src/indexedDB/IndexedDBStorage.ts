@@ -458,6 +458,11 @@ export class IndexedDBStorage implements IAsyncStorage {
         }
     }
 
+    /**
+     * 
+     * @param objectStoreName 
+     * @param key 
+     */
     public async count(objectStoreName: string, key?: string | number | IDBKeyRange | Date | IDBArrayKey): Promise<number> {
         try{
             const count = await this.countElementsInObjectStore(objectStoreName, key)
@@ -477,6 +482,4 @@ export class IndexedDBStorage implements IAsyncStorage {
         const index = this.index(objectStoreName, keyName)
         return await index.get(keyValue)
     }
-
-    
 }
