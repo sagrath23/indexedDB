@@ -63,7 +63,7 @@ export class IndexedDBStorage implements IAsyncStorage {
     
             // this callback is executed when the database is open
             request.onblocked = function(event) {
-                console.warn("Database is opened")
+                console.warn("Database is blocked")
                 reject(event)
             }
     
@@ -81,14 +81,14 @@ export class IndexedDBStorage implements IAsyncStorage {
      * @param objectStoreSpec 
      */
     private createObjectStore(database: IDBDatabase, objectStoreSpec: IObjectStoreSpec): void{
-        console.log("creating objectStore "+objectStoreSpec.objectStoreName, "IndexedDBStorage.createObjectStore")
+        console.log(`creating objectStore ${objectStoreSpec.objectStoreName}`)        
         //create objectStore
         const objectStore = database.createObjectStore(objectStoreSpec.objectStoreName,objectStoreSpec.objectStoreSettings)
         //and create index if are defined
         if(objectStoreSpec.objectStoreIndexes){
             for (const i in objectStoreSpec.objectStoreIndexes) {
                 //create index
-                console.log("creating index "+objectStoreSpec.objectStoreIndexes[i].indexName+" for objectStore "+objectStoreSpec.objectStoreName, "IndexedDBStorage.createObjectStore")
+                console.log(`creating index ${objectStoreSpec.objectStoreIndexes[i].indexName} for objectStore ${objectStoreSpec.objectStoreName}`)
                 objectStore.createIndex(objectStoreSpec.objectStoreIndexes[i].indexName, objectStoreSpec.objectStoreIndexes[i].keyPath, objectStoreSpec.objectStoreIndexes[i].optionalParams)
             }
         }
@@ -166,12 +166,12 @@ export class IndexedDBStorage implements IAsyncStorage {
                 const request = objectStore.get(keyValue)
                 //hendling when insertion is success
                 request.onsuccess = function (event) {
-                    console.log("Object "+keyValue+" founded in "+ objectStoreName+" objectStore")
+                    console.log(`object ${keyValue} founded in ${objectStoreName} objectStore`)
                     resolve(this.result)
                 }
                 //and when 
                 request.onerror = function() {
-                    console.error("error trying to get "+keyValue+" : ", this.error);
+                    console.log(`error trying to get ${keyValue} item in ${objectStoreName} objectStore: `, this.error)
                     reject()
                 }
             } catch(error){
@@ -202,7 +202,7 @@ export class IndexedDBStorage implements IAsyncStorage {
                 }
                 //hendling when insertion is success
                 request.onsuccess = function (event) {
-                    console.log("Update in DB successful")
+                    console.log(`object ${item} updated in ${objectStoreName} objectStore`)
                     resolve()
                 }
                 //and when 
@@ -233,12 +233,12 @@ export class IndexedDBStorage implements IAsyncStorage {
                 const request = objectStore.delete(keyValue)
                 //hendling when insertion is success
                 request.onsuccess = function (event) {
-                    console.log("Object "+keyValue+" deleted from "+ objectStoreName+" objectStore")
+                    console.log(`Object ${keyValue} deleted from ${objectStoreName} objectStore`)
                     resolve()
                 }
                 //and when 
                 request.onerror = function() {
-                    console.error("error trying to delete "+keyValue+" : ", this.error);
+                    console.log(`error trying to delete ${keyValue}: `, this.error)
                     reject()
                 }
 
@@ -264,12 +264,12 @@ export class IndexedDBStorage implements IAsyncStorage {
                 const request = objectStore.openCursor(cursorRange, cursorDirection)
                 //hendling when insertion is success
                 request.onsuccess = function (event) {
-                    console.log("Cursor opened for "+ objectStoreName+" objectStore")
+                    console.log(`cursor opened for ${objectStoreName} objectStore`)
                     resolve(this.result)
                 }
                 //and when 
                 request.onerror = function() {
-                    console.error("error trying to open a cursor in "+objectStoreName+" : ", this.error);
+                    console.log(`error trying to open a cursor on ${objectStoreName} objectStore: `, this.error)
                     reject()
                 }
 
@@ -280,11 +280,72 @@ export class IndexedDBStorage implements IAsyncStorage {
 
     }
 
+    /**
+     * 
+     * @param objectStoreName 
+     * @param keyName 
+     */
     private indexInObjectStore(objectStoreName: string, keyName: string): IDBIndex{
         const me = this
         //get ObjectStore to store data
         const objectStore = me.getObjectStore(objectStoreName)
         return objectStore.index(keyName)
+    }
+
+    /**
+     * 
+     * @param objectStoreName 
+     */
+    private clearObjectStore(objectStoreName: string): Promise<IDBRequest> {
+        const me = this
+        return new Promise((resolve,reject)=>{
+            //get ObjectStore to store data
+            const objectStore = me.getObjectStore(objectStoreName)
+            try{
+                //and try to delete it 
+                const request = objectStore.clear()
+                //hendling when insertion is success
+                request.onsuccess = function (event) {
+                    console.log(`objectStore ${objectStoreName} cleared.`)
+                    resolve(this.result)
+                }
+                //and when 
+                request.onerror = function() {
+                    console.log(`error trying to clear ${objectStoreName} objectStore`, this.error)
+                    reject()
+                }
+            } catch(error){
+                throw error
+            }
+        })
+    }
+
+    /**
+     * 
+     * @param objectStoreName 
+     * @param key 
+     */
+    private countElementsInObjectStore(objectStoreName, key?): Promise<number>{
+        const me = this
+        return new Promise((resolve,reject)=>{
+            //get ObjectStore to store data
+            const objectStore = me.getObjectStore(objectStoreName)
+            try{
+                const request = objectStore.count(key)
+
+                request.onsuccess = function (event) {
+                    console.log(`objectStore ${objectStoreName} has ${key} elements`)
+                    resolve(this.result)
+                }
+                //and when 
+                request.onerror = function() {
+                    console.error(`error trying to count elements in ${objectStoreName} objectStore: `, this.error);
+                    reject()
+                }
+            } catch(error){
+                throw error
+            }
+        })
     }
 
     /**
@@ -387,6 +448,28 @@ export class IndexedDBStorage implements IAsyncStorage {
     /**
      * 
      * @param objectStoreName 
+     */
+    public async clear(objectStoreName: string): Promise<IDBRequest> {
+        try{
+            const request = await this.clearObjectStore(objectStoreName)
+            return request
+        } catch(error){
+            throw error
+        }
+    }
+
+    public async count(objectStoreName: string, key?: string | number | IDBKeyRange | Date | IDBArrayKey): Promise<number> {
+        try{
+            const count = await this.countElementsInObjectStore(objectStoreName, key)
+        }catch(error){
+            throw error
+        }
+        throw new Error("Method not implemented.");
+    }
+    
+    /**
+     * 
+     * @param objectStoreName 
      * @param keyName 
      * @param keyValue 
      */
@@ -395,6 +478,5 @@ export class IndexedDBStorage implements IAsyncStorage {
         return await index.get(keyValue)
     }
 
-    //TODO: implement keyCursor Functionality
-
+    
 }
