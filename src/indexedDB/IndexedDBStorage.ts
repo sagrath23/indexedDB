@@ -396,5 +396,5 @@ export class IndexedDBStorage implements IAsyncStorage {
     }
 
     //TODO: implement keyCursor Functionality
-    
+
 }

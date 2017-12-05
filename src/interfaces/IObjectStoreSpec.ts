@@ -7,6 +7,6 @@ export interface IIndexDBSpec {
 
 export interface IObjectStoreSpec {
     objectStoreName: string,
-    objectStoreSettings: IDBObjectStoreParameters
+    objectStoreSettings?: IDBObjectStoreParameters
     objectStoreIndexes?: IIndexDBSpec | IIndexDBSpec[]
 }
