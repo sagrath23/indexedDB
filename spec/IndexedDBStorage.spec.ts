@@ -1,4 +1,5 @@
 // required to get window.indexedDB object
+import * as fs from "fs-js"
 import * as puppeteer from "puppeteer"
 
 
@@ -12,11 +13,13 @@ describe("IndexedDBStorage: Creation", () => {
     try {
       const page = await browser.newPage()
 
-      //TODO: replace for an valid URL in 
-      await page.goto('file://D:\\xampp\\htdocs\\idb\\index.html');
+      await page.goto("https://www.google.com");
 
       // to pass __awaiter function
       await page.addScriptTag({path: "./tslib.js", content: "text/javascript"})
+
+      // to pass __awaiter function
+      await page.addScriptTag({path: "./bundle.js", content: "text/javascript"})
 
       await page.evaluate(async function(){
         await indexedDB.deleteDatabase("dbTest");
@@ -37,16 +40,13 @@ describe("IndexedDBStorage: Creation", () => {
     try {
       const page = await browser.newPage()
 
-      //TODO: replace for an valid URL in 
-      await page.goto('file://D:\\xampp\\htdocs\\idb\\index.html');
-
+      await page.goto("https://www.google.com");
+      
       // to pass __awaiter function
       await page.addScriptTag({path: "./tslib.js", content: "text/javascript"})
 
-      // const database = new IndexedDBStorage()
-      // await page.evaluate(async function(database){
-      //   await database.openIDB("dbTest", 1, [{objectStoreName: "objectStoreTest"}])
-      // }, database)
+      // to pass __awaiter function
+      await page.addScriptTag({path: "./bundle.js", content: "text/javascript"})
 
       const database = await page.evaluate(async function(){
         //this is the ugly part of the test
@@ -73,16 +73,13 @@ describe("IndexedDBStorage: Creation", () => {
     try {
       const page = await browser.newPage()
 
-      //TODO: replace for an valid URL in 
-      await page.goto('file://D:\\xampp\\htdocs\\idb\\index.html');
+      await page.goto("https://www.google.com");
 
       // to pass __awaiter function
       await page.addScriptTag({path: "./tslib.js", content: "text/javascript"})
 
-      // const database = new IndexedDBStorage()
-      // await page.evaluate(async function(database){
-      //   await database.openIDB("dbTest", 1, [{objectStoreName: "objectStoreTest"}])
-      // }, database)
+      // to pass __awaiter function
+      await page.addScriptTag({path: "./bundle.js", content: "text/javascript"})
 
       const database = await page.evaluate(async function(){
         //this is the ugly part of the test
@@ -109,16 +106,13 @@ describe("IndexedDBStorage: Creation", () => {
     try {
       const page = await browser.newPage()
 
-      //TODO: replace for an valid URL in 
-      await page.goto('file://D:\\xampp\\htdocs\\idb\\index.html');
-
+      await page.goto("https://www.google.com");
+      
       // to pass __awaiter function
       await page.addScriptTag({path: "./tslib.js", content: "text/javascript"})
 
-      // const database = new IndexedDBStorage()
-      // await page.evaluate(async function(database){
-      //   await database.openIDB("dbTest", 1, [{objectStoreName: "objectStoreTest"}])
-      // }, database)
+      // to pass __awaiter function
+      await page.addScriptTag({path: "./bundle.js", content: "text/javascript"})
 
       const database = await page.evaluate(async function(){
         //this is the ugly part of the test

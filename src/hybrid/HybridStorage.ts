@@ -13,6 +13,4 @@ export class HybridStorage {
         //start to open database 
         this.dbStorage.openIDB("Memory",1,[{objectStoreName: "objectStoreTest", objectStoreSettings: {keyPath: "id", autoIncrement: true}}])
     }
-
-    public add()
 }

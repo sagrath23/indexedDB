@@ -21,7 +21,7 @@ export class MemoryObjectStore{
             throw new Error("Failed to execute 'add' on 'MemoryObjectStore': The object store uses out-of-line keys and has no key generator and the key parameter was not provided.")
         }
         //now, if 
-        this.objects[key]
+        //this.objects[key]
     }
 
     clear(): IDBRequest {
