@@ -211,7 +211,7 @@ describe("IndexedDBStorage: Test with mock", () => {
         }]
       }])
 
-      const element = {id: 1, name:"Test 1",value: 123}
+      let element = {id: 1, name:"Test 1",value: 123}
 
       await database.add("objectStoreTest",element)
 
@@ -221,10 +221,112 @@ describe("IndexedDBStorage: Test with mock", () => {
 
       expect(countElements).toEqual(1)
 
-      const otherElement = await database.get("objectStoreTest",1)
+      let otherElement = await database.get("objectStoreTest",1)
 
       expect(otherElement).toEqual(element)
 
+      otherElement["name"] = "prueba de modificación"
+
+      await database.put("objectStoreTest", otherElement)
+
+      let anotherElement = await database.get("objectStoreTest",1)
+
+      expect(anotherElement).toEqual(otherElement)
+
+      done()
+
+    } catch (err) {
+      done.fail(err)
+    }
+  }))
+
+  it("should open a cursor", (async (done) => {
+    try {
+
+      const database = new IndexedDBStorage(window)
+
+      //try to open the database
+      await database.openIDB("dbTest", 1, [{
+        objectStoreName: "objectStoreTest", 
+        objectStoreSettings: {
+          keyPath: "id", 
+          autoIncrement: true
+        },
+        objectStoreIndexes: [{
+          indexName: "nameIndex",
+          keyPath: "name"
+        }]
+      }])
+
+      expect(database).toBeDefined()
+
+      let elements = []
+
+      for(let i = 0; i < 20; i++){
+        let element = {id: i+1, name:`test ${i}`,value: 123+i }
+        elements.push(element)
+        await database.add("objectStoreTest",element)
+      }
+
+      const countElements = await database.count("objectStoreTest")
+
+      expect(countElements).toEqual(20)
+
+      const cursor = await database.openCursor("objectStoreTest")
+
+      expect(cursor).toBeDefined()
+      
+      let i = 0
+      if(cursor){
+        expect(cursor.value).toEqual(elements[i])
+        i++
+        cursor.continue()
+      }
+      
+      done()
+
+    } catch (err) {
+      done.fail(err)
+    }
+  }))
+
+  it("should get an element using an index", (async (done) => {
+    try {
+
+      const database = new IndexedDBStorage(window)
+
+      //try to open the database
+      await database.openIDB("dbTest", 1, [{
+        objectStoreName: "objectStoreTest", 
+        objectStoreSettings: {
+          keyPath: "id", 
+          autoIncrement: true
+        },
+        objectStoreIndexes: [{
+          indexName: "nameIndex",
+          keyPath: "name"
+        }]
+      }])
+
+      expect(database).toBeDefined()
+
+      let elements = []
+      for(let i = 0; i < 20; i++){
+        let element = {id: i+1, name:`test ${i}`,value: 123+i }
+        elements.push(element)
+        await database.add("objectStoreTest",element)
+      }
+
+      const countElements = await database.count("objectStoreTest")
+
+      expect(countElements).toEqual(20)
+
+      const otherElement = await database.getItemByIndex("objectStoreTest","nameIndex", "test 10")
+
+      console.log(otherElement)
+      
+      expect(otherElement).toEqual(elements[9])
+      
       done()
 
     } catch (err) {

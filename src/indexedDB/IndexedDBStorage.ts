@@ -283,7 +283,7 @@ export class IndexedDBStorage implements IAsyncStorage {
         const me = this
         return new Promise((resolve,reject)=>{
             //get ObjectStore to store data
-            const objectStore = me.getObjectStore(objectStoreName)
+            const objectStore = me.getObjectStore(objectStoreName, READ_WRITE)
             try{
                 //and try to delete it 
                 const request = objectStore.openCursor(cursorRange, cursorDirection)
@@ -313,7 +313,7 @@ export class IndexedDBStorage implements IAsyncStorage {
     private indexInObjectStore(objectStoreName: string, keyName: string): IDBIndex{
         const me = this
         //get ObjectStore to store data
-        const objectStore = me.getObjectStore(objectStoreName)
+        const objectStore = me.getObjectStore(objectStoreName, READ_WRITE)
         return objectStore.index(keyName)
     }
 
