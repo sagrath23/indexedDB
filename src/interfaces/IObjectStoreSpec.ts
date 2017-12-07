@@ -2,7 +2,7 @@
 export interface IIndexDBSpec {
     indexName: string,
     keyPath: string| string[],
-    optionalParams: Object
+    optionalParams?: Object
 }
 
 export interface IObjectStoreSpec {

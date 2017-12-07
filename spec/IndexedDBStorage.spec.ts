@@ -10,9 +10,7 @@ import { IndexedDBStorage } from "../src/indexedDB/IndexedDBStorage"
 describe("IndexedDBStorage: Test with mock", () => {
   // Create an IDBFactory at window.indexedDB so your code can use IndexedDB.
   const window = new Object()
-  
   window["indexedDB"] = new IDBFactory();
-
   // Make IDBKeyRange global so your code can create key ranges.
   window["IDBKeyRange"] = IDBKeyRange;
 
@@ -37,6 +35,203 @@ describe("IndexedDBStorage: Test with mock", () => {
       done.fail(err)
     }
   }))
+
+  it("should create & open an empty IndexedDBStorage, with keyPath & autoIncrement", (async (done) => {
+    try {
+
+      const database = new IndexedDBStorage(window)
+
+      //try to open the database
+      await database.openIDB("dbTest", 1, [{objectStoreName: "objectStoreTest", objectStoreSettings: {keyPath: "id", autoIncrement: true}}])
+
+      expect(database).toBeDefined()
+
+      done()
+
+    } catch (err) {
+      done.fail(err)
+    }
+  }))
+
+  it("should create & open an empty IndexedDBStorage, with keyPath, autoIncrement & indexes ", (async (done) => {
+    try {
+
+      const database = new IndexedDBStorage(window)
+
+      //try to open the database
+      await database.openIDB("dbTest", 1, [{
+        objectStoreName: "objectStoreTest", 
+        objectStoreSettings: {
+          keyPath: "id", 
+          autoIncrement: true
+        },
+        objectStoreIndexes: [{
+          indexName: "nameIndex",
+          keyPath: "name"
+        }]
+      }])
+
+      expect(database).toBeDefined()
+
+      done()
+
+    } catch (err) {
+      done.fail(err)
+    }
+  }))
+
+  it("should add an element", (async (done) => {
+    try {
+
+      const database = new IndexedDBStorage(window)
+
+      //try to open the database
+      await database.openIDB("dbTest", 1, [{
+        objectStoreName: "objectStoreTest", 
+        objectStoreSettings: {
+          keyPath: "id", 
+          autoIncrement: true
+        },
+        objectStoreIndexes: [{
+          indexName: "nameIndex",
+          keyPath: "name"
+        }]
+      }])
+
+      await database.add("objectStoreTest",{name:"Test 1",value: 123})
+
+      expect(database).toBeDefined()
+
+      const countElements = await database.count("objectStoreTest")
+
+      expect(countElements).toEqual(1)
+
+      done()
+
+    } catch (err) {
+      done.fail(err)
+    }
+  }))
+
+  it("should get an element", (async (done) => {
+    try {
+
+      const database = new IndexedDBStorage(window)
+
+      //try to open the database
+      await database.openIDB("dbTest", 1, [{
+        objectStoreName: "objectStoreTest", 
+        objectStoreSettings: {
+          keyPath: "id", 
+          autoIncrement: true
+        },
+        objectStoreIndexes: [{
+          indexName: "nameIndex",
+          keyPath: "name"
+        }]
+      }])
+
+      const element = {id: 1, name:"Test 1",value: 123}
+
+      await database.add("objectStoreTest",element)
+
+      expect(database).toBeDefined()
+
+      const countElements = await database.count("objectStoreTest")
+
+      expect(countElements).toEqual(1)
+
+      const otherElement = await database.get("objectStoreTest",1)
+
+      expect(otherElement).toEqual(element)
+
+      done()
+
+    } catch (err) {
+      done.fail(err)
+    }
+  }))
+
+  it("should delete an element", (async (done) => {
+    try {
+
+      const database = new IndexedDBStorage(window)
+
+      //try to open the database
+      await database.openIDB("dbTest", 1, [{
+        objectStoreName: "objectStoreTest", 
+        objectStoreSettings: {
+          keyPath: "id", 
+          autoIncrement: true
+        },
+        objectStoreIndexes: [{
+          indexName: "nameIndex",
+          keyPath: "name"
+        }]
+      }])
+
+      const element = {id: 1, name:"Test 1",value: 123}
+
+      await database.add("objectStoreTest",element)
+
+      expect(database).toBeDefined()
+
+      await database.delete("objectStoreTest", 1)
+
+      const countElements = await database.count("objectStoreTest")
+
+      expect(countElements).toEqual(0)
+
+      const otherElement = await database.get("objectStoreTest",1)
+
+      expect(otherElement).toBeUndefined()
+
+      done()
+
+    } catch (err) {
+      done.fail(err)
+    }
+  }))
+
+  it("should update an element", (async (done) => {
+    try {
+
+      const database = new IndexedDBStorage(window)
+
+      //try to open the database
+      await database.openIDB("dbTest", 1, [{
+        objectStoreName: "objectStoreTest", 
+        objectStoreSettings: {
+          keyPath: "id", 
+          autoIncrement: true
+        },
+        objectStoreIndexes: [{
+          indexName: "nameIndex",
+          keyPath: "name"
+        }]
+      }])
+
+      const element = {id: 1, name:"Test 1",value: 123}
+
+      await database.add("objectStoreTest",element)
+
+      expect(database).toBeDefined()
+
+      const countElements = await database.count("objectStoreTest")
+
+      expect(countElements).toEqual(1)
+
+      const otherElement = await database.get("objectStoreTest",1)
+
+      expect(otherElement).toEqual(element)
+
+      done()
+
+    } catch (err) {
+      done.fail(err)
+    }
+  }))
+
 })
 
 describe("IndexedDBStorage: Test with Puppeteer", () => {

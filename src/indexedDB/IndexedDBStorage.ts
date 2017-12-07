@@ -52,7 +52,8 @@ export class IndexedDBStorage implements IAsyncStorage {
                 //now, create a objectStore object
                 for(const i in me.objectStoreSpec) {
                     //and add the new objectStore to our objectStores object
-                    //me.createObjectStore(me.database, me.objectStoreSpec[i]);
+                    me.createObjectStore(me.database, me.objectStoreSpec[i]);
+                    /*
                     console.log(`creating objectStore ${objectStoreSpec[i].objectStoreName}`)        
                     //create objectStore
                     const objectStore = me.database.createObjectStore(objectStoreSpec[i].objectStoreName,objectStoreSpec[i].objectStoreSettings)
@@ -64,6 +65,7 @@ export class IndexedDBStorage implements IAsyncStorage {
                             objectStore.createIndex(objectStoreSpec[i].objectStoreIndexes[j].indexName, objectStoreSpec[i].objectStoreIndexes[j].keyPath, objectStoreSpec[i].objectStoreIndexes[j].optionalParams)
                         }
                     }
+                    */
                 }
             }
     
@@ -184,7 +186,12 @@ export class IndexedDBStorage implements IAsyncStorage {
                 const request = objectStore.get(keyValue)
                 //hendling when insertion is success
                 request.onsuccess = function (event) {
-                    console.log(`object ${keyValue} founded in ${objectStoreName} objectStore`)
+                    if(this.result){
+                        console.log(`object ${keyValue} founded in ${objectStoreName} objectStore`)
+                    } else {
+                        console.log(`object ${keyValue} not founded in ${objectStoreName} objectStore`)
+                    }
+                    
                     resolve(this.result)
                 }
                 //and when 
@@ -347,12 +354,12 @@ export class IndexedDBStorage implements IAsyncStorage {
         const me = this
         return new Promise((resolve,reject)=>{
             //get ObjectStore to store data
-            const objectStore = me.getObjectStore(objectStoreName)
+            const objectStore = me.getObjectStore(objectStoreName, READ_ONLY)
             try{
                 const request = objectStore.count(key)
 
                 request.onsuccess = function (event) {
-                    console.log(`objectStore ${objectStoreName} has ${key} elements`)
+                    console.log(`objectStore ${objectStoreName} has ${this.result} elements`)
                     resolve(this.result)
                 }
                 //and when 
@@ -495,10 +502,10 @@ export class IndexedDBStorage implements IAsyncStorage {
     public async count(objectStoreName: string, key?: string | number | IDBKeyRange | Date | IDBArrayKey): Promise<number> {
         try{
             const count = await this.countElementsInObjectStore(objectStoreName, key)
+            return count
         }catch(error){
             throw error
         }
-        throw new Error("Method not implemented.");
     }
     
     /**
