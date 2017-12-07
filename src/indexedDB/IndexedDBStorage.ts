@@ -10,7 +10,8 @@ const ADD = 'add'
 const GET = 'get'
 const DELETE = 'delete'
 export class IndexedDBStorage implements IAsyncStorage {
-
+    
+    private window: any
     private databaseCreated: boolean
     private databaseName: string
     private databaseVersion: number
@@ -36,7 +37,12 @@ export class IndexedDBStorage implements IAsyncStorage {
         return new Promise((resolve, reject) => {
             console.log("opening IDB Database...", "IndexedDBStorage.openIndexedDB")
             //start to open the database
-            const request = window.indexedDB.open(me.databaseName, me.databaseVersion)
+            let request
+            if(me.window){
+                request = me.window.indexedDB.open(me.databaseName, me.databaseVersion)
+            } else{
+                request = window.indexedDB.open(me.databaseName, me.databaseVersion)
+            }
             
             // this callback is executed, when a new Database is created
             request.onupgradeneeded = function(event) {
@@ -363,7 +369,10 @@ export class IndexedDBStorage implements IAsyncStorage {
     /**
      * Class constructor
      */
-    constructor() {
+    constructor(window?: any) {
+        if(window){
+            this.window = window
+        }
     }
 
     /**

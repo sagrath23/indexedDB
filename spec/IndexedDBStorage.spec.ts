@@ -1,14 +1,48 @@
 // required to get window.indexedDB object
 import * as fs from "fs-js"
 import * as puppeteer from "puppeteer"
+// Require the mock.
+const { IDBFactory, IDBKeyRange, reset } = require('shelving-mock-indexeddb');
 
 
 import { IndexedDBStorage } from "../src/indexedDB/IndexedDBStorage"
 
-describe("IndexedDBStorage: Creation", () => {
+describe("IndexedDBStorage: Test with mock", () => {
+  // Create an IDBFactory at window.indexedDB so your code can use IndexedDB.
+  const window = new Object()
+  
+  window["indexedDB"] = new IDBFactory();
+
+  // Make IDBKeyRange global so your code can create key ranges.
+  window["IDBKeyRange"] = IDBKeyRange;
+
+  // Reset the IndexedDB mock before/after tests.
+  // This will clear all object stores, indexes, and data.
+  beforeEach(() => reset());
+  afterEach(() => reset());
+  
+  it("should create & open an empty IndexedDBStorage", (async (done) => {
+    try {
+
+      const database = new IndexedDBStorage(window)
+
+      //try to open the database
+      await database.openIDB("dbTest", 1, [{objectStoreName: "objectStoreTest"}])
+
+      expect(database).toBeDefined()
+
+      done()
+
+    } catch (err) {
+      done.fail(err)
+    }
+  }))
+})
+
+describe("IndexedDBStorage: Test with Puppeteer", () => {
   let browser
   let page
-  let window
+  let indexedDB
   
   afterEach(async ()=>{
     //delete IndexedDB 
@@ -31,18 +65,16 @@ describe("IndexedDBStorage: Creation", () => {
 
     page = await browser.newPage()
     await page.goto("https://www.google.com");
-    //get window object from puppeteer
-    window = await page.evaluate(async ()=>{
-      return Promise.resolve(window)
-    })
+    //get indexedDB object from puppeteer
+    indexedDB = await page.evaluateHandle(() => Promise.resolve(window.indexedDB))
 
-    console.log(window, "Window")
+    console.log(indexedDB, "Window")
   })
 
-  it("should create & open an empty IndexedDBStorage", (async (done) => {
+  xit("should create & open an empty IndexedDBStorage", (async (done) => {
     try {
 
-      const database = new IndexedDBStorage()
+      const database = new IndexedDBStorage(indexedDB)
 
       //try to open the database
       await database.openIDB("dbTest", 1, [{objectStoreName: "objectStoreTest"}])
@@ -55,7 +87,7 @@ describe("IndexedDBStorage: Creation", () => {
       done.fail(err)
     }
   }))
-
+/*
   
   xit("should create & open an empty IndexedDBStorage, without kepyPath & autoIncrement", (async (done) => {
 
@@ -232,5 +264,6 @@ describe("IndexedDBStorage: Creation", () => {
       done.fail(err)
     }
   }))
+  */
 })
 
