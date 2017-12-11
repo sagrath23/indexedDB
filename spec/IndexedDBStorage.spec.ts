@@ -272,17 +272,14 @@ describe("IndexedDBStorage: Test with mock", () => {
 
       expect(countElements).toEqual(20)
 
-      const cursor = await database.openCursor("objectStoreTest")
+      const returnedObjects = await database.getItemsByCursor("objectStoreTest")
 
-      expect(cursor).toBeDefined()
+      expect(returnedObjects).toBeDefined()
       
-      let i = 0
-      if(cursor){
-        expect(cursor.value).toEqual(elements[i])
-        i++
-        cursor.continue()
+      for(let i = 0; i < 20; i++){
+        expect(returnedObjects[i]).toEqual(elements[i])
       }
-      
+
       done()
 
     } catch (err) {
@@ -322,10 +319,8 @@ describe("IndexedDBStorage: Test with mock", () => {
       expect(countElements).toEqual(20)
 
       const otherElement = await database.getItemByIndex("objectStoreTest","nameIndex", "test 10")
-
-      console.log(otherElement)
       
-      expect(otherElement).toEqual(elements[9])
+      expect(otherElement).toEqual(elements[10])
       
       done()
 

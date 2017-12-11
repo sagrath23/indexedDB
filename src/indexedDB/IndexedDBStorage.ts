@@ -279,7 +279,7 @@ export class IndexedDBStorage implements IAsyncStorage {
      * @param cursorRange 
      * @param cursorDirection 
      */
-    private openCursorInObjectStore(objectStoreName: string, cursorRange?: IDBKeyRange | IDBValidKey, cursorDirection?: IDBCursorDirection): Promise<IDBCursor>{
+    private openCursorInObjectStore(objectStoreName: string, cursorRange?: IDBKeyRange | IDBValidKey, cursorDirection?: IDBCursorDirection): Promise<Object[]>{
         const me = this
         return new Promise((resolve,reject)=>{
             //get ObjectStore to store data
@@ -287,10 +287,20 @@ export class IndexedDBStorage implements IAsyncStorage {
             try{
                 //and try to delete it 
                 const request = objectStore.openCursor(cursorRange, cursorDirection)
+                let retrieveObjects = []
                 //hendling when insertion is success
+                console.log("trying to open a cursor")
                 request.onsuccess = function (event) {
-                    console.log(`cursor opened for ${objectStoreName} objectStore`)
-                    resolve(this.result)
+                    let cursor = this.result
+
+                    if(cursor){
+                        if(cursor.value){
+                            retrieveObjects.push(cursor.value)
+                            cursor.continue()
+                        }
+                    } else{
+                        resolve(retrieveObjects)
+                    }
                 }
                 //and when 
                 request.onerror = function() {
@@ -456,30 +466,6 @@ export class IndexedDBStorage implements IAsyncStorage {
             throw error
         }
     }
-
-    /**
-     * 
-     * @param objectStoreName 
-     * @param cursorRange 
-     * @param cursorDirection 
-     */
-    public async openCursor(objectStoreName: string, cursorRange?: IDBKeyRange | IDBValidKey, cursorDirection?: IDBCursorDirection): Promise<IDBCursor> {
-        try{
-            const cursor = await this.openCursorInObjectStore(objectStoreName, cursorRange, cursorDirection)
-            return cursor
-        } catch(error){
-            throw error
-        }
-    }
-
-    /**
-     * 
-     * @param objectStoreName 
-     * @param keyName 
-     */
-    public index(objectStoreName: string, keyName: string): IDBIndex {
-        return this.indexInObjectStore(objectStoreName, keyName)
-    }
     
     /**
      * 
@@ -515,7 +501,29 @@ export class IndexedDBStorage implements IAsyncStorage {
      * @param keyValue 
      */
     public async getItemByIndex(objectStoreName: string, keyName: string, keyValue: IDBKeyRange | IDBValidKey): Promise<Object> {
-        const index = this.index(objectStoreName, keyName)
-        return await index.get(keyValue)
+        const index = this.indexInObjectStore(objectStoreName, keyName)
+        //create a promise to get the value
+        const value = await new Promise((resolve, reject) => {
+            const request = index.get(keyValue)
+
+            request.onsuccess = (response) => {
+                resolve(request.result)
+            }
+
+            request.onerror = (error) => {
+                reject(error)
+            }
+        })
+        return value
+    }
+
+    public async getItemsByCursor(objectStoreName: string, cursorRange?: IDBKeyRange | IDBValidKey, cursorDirection?: IDBCursorDirection): Promise<Object[]>{
+        try{
+            const objects = await this.openCursorInObjectStore(objectStoreName, cursorRange, cursorDirection)
+            return objects
+
+        } catch(error){
+            throw error
+        }
     }
 }
