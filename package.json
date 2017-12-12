@@ -5,7 +5,8 @@
     "main": "index.js",
     "scripts": {
         "build": "webpack",
-        "test": "jest --coverage"
+        "test": "jest --coverage",
+        "watch": "jest --watchAll --no-watchman"
     },
     "repository": {
         "type": "git",
