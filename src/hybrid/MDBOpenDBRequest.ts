@@ -16,7 +16,7 @@ export class MDBOpenDBRequest {
             throw new TypeError('MDBOpenDBRequest: version must be a valid version or false');
         } 
 
-
+        
 
     }
 }
