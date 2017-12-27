@@ -2,6 +2,10 @@ import { Helper } from './Helper'
 
 export class MDBOpenDBRequest {
 
+    private result
+    private active
+    private transaction
+
     constructor(dbName: string, version: number | boolean){
         //check inputs
         if (!Helper.validIdentifier(dbName)){

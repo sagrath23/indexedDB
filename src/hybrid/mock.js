@@ -75,8 +75,11 @@ class IDBDatabase extends EventTarget {
         Object.defineProperty(this, 'version', { value: version, enumerable: true });
         Object.defineProperty(this, 'objectStoreNames', {
             enumerable: true,
-            get() { const names = Object.keys(data);
-                names.sort(); return names; },
+            get() {
+                const names = Object.keys(data);
+                names.sort();
+                return names;
+            },
             set() { throw new Error('IDBDatabase: _data is read only'); }
         });
         Object.defineProperty(this, '_data', {
@@ -602,8 +605,11 @@ class IDBObjectStore {
         Object.defineProperty(this, 'autoIncrement', { value: autoIncrement, enumerable: true });
         Object.defineProperty(this, 'indexNames', {
             enumerable: true,
-            get() { const names = Object.keys(transaction._data[storeName].indexes);
-                names.sort(); return names; },
+            get() {
+                const names = Object.keys(transaction._data[storeName].indexes);
+                names.sort();
+                return names;
+            },
             set() { throw new Error('IDBObjectStore: indexNames is read only'); }
         });
 
@@ -1306,7 +1312,7 @@ class DOMException extends Error {
 }
 
 // Functions.
-
+|
 // Reset data.
 function reset() {
     // Delete everything.
