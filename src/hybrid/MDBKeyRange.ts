@@ -1,13 +1,14 @@
 import { Helper } from "./Helper";
 
+type RangeType = number | string | Date 
 export class MDBKeyRange {
 
-    private lower: number | string | Date
-    private upper: number | string | Date
+    private lower: RangeType
+    private upper: RangeType
     private lowerOpen: boolean
     private upperOpen: boolean
 
-    private static checkInputs(lower: number | string | Date, upper: number | string | Date, lowerOpen = false, upperOpen = false){
+    private static checkInputs(lower: RangeType, upper: RangeType, lowerOpen = false, upperOpen = false){
         if (!Helper.validKey(lower) && lower !== undefined) throw new DOMException('IDBKeyRange: lower must be a valid key (string, number, date) or undefined', 'DataError');
         if (!Helper.validKey(upper) && upper !== undefined) throw new DOMException('IDBKeyRange: upper must be a valid key (string, number, date) or undefined', 'DataError');
         if (typeof lowerOpen !== 'boolean') throw new DOMException('IDBKeyRange: lowerOpen must be boolean', 'DataError');
@@ -15,7 +16,7 @@ export class MDBKeyRange {
         if (lower > upper) throw new DOMException('IDBKeyRange: lower must be lower than upper', 'DataError');
     }
     
-    constructor(lower: number | string | Date, upper: number | string | Date, lowerOpen = false, upperOpen = false){
+    constructor(lower: RangeType, upper: RangeType, lowerOpen = false, upperOpen = false){
         //checks
         MDBKeyRange.checkInputs(lower,upper, lowerOpen, upperOpen)
 
@@ -25,14 +26,14 @@ export class MDBKeyRange {
         this.upperOpen = upperOpen
     }
 
-    public static bound(lower: number | string | Date, upper: number | string | Date, lowerOpen = false, upperOpen = false): MDBKeyRange{
+    public static bound(lower: RangeType, upper: RangeType, lowerOpen = false, upperOpen = false): MDBKeyRange{
         //checks
         MDBKeyRange.checkInputs(lower,upper, lowerOpen, upperOpen)
         //create new MDBKeyRange
         return new MDBKeyRange(lower, upper, lowerOpen, upperOpen)
     }
 
-    public static only(value: number | string | Date): MDBKeyRange{
+    public static only(value: RangeType): MDBKeyRange{
         // Checks.
         if (!Helper.validKey(value)) throw new DOMException('only(): value must be a valid key (string, number, date)', 'DataError');
 
@@ -40,7 +41,7 @@ export class MDBKeyRange {
         return new MDBKeyRange(value, value, false, false);
     }
 
-    public static lowerBound (value: number | string | Date, open = false): MDBKeyRange {
+    public static lowerBound (value: RangeType, open = false): MDBKeyRange {
         // Checks.
         if (!Helper.validKey(value)) throw new DOMException('lowerBound(): value must be a valid key (string, number, date)', 'DataError');
         if (typeof open !== 'boolean') throw new DOMException('lowerBound(): open must be boolean', 'DataError');
@@ -49,7 +50,7 @@ export class MDBKeyRange {
         return new MDBKeyRange(value, undefined, open, true);
     }
 
-    public static upperBound (value: number | string | Date, open = false): MDBKeyRange {
+    public static upperBound (value: RangeType, open = false): MDBKeyRange {
         // Checks.
         if (!Helper.validKey(value)) throw new DOMException('lowerBound(): value must be a valid key (string, number, date)', 'DataError');
         if (typeof open !== 'boolean') throw new DOMException('lowerBound(): open must be boolean', 'DataError');
