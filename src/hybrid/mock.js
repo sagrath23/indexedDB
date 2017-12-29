@@ -10,6 +10,7 @@ const storage = {}; // Root storage.
 // IndexedDB classes.
 
 // IDBFactory mock.
+//TODO: Done
 class IDBFactory {
     // Construct.
     constructor() {
@@ -45,6 +46,7 @@ Object.defineProperty(IDBFactory, 'cmp', {
 });
 
 // IDBDatabase database connection mock.
+//TODO: Done
 class IDBDatabase extends EventTarget {
     // Construct.
     constructor(dbName, version, data) {
@@ -219,6 +221,7 @@ class IDBDatabase extends EventTarget {
 }
 
 // IDBTransaction mock.
+//TODO: Done
 class IDBTransaction extends EventTarget {
     // Construct.
     constructor(db, storeNames, mode = 'readonly') {
@@ -363,6 +366,7 @@ class IDBTransaction extends EventTarget {
 }
 
 // IDBRequest mock.
+//TODO:
 class IDBRequest extends EventTarget {
     // Construct.
     constructor(input, callback) {
@@ -450,6 +454,7 @@ class IDBRequest extends EventTarget {
 }
 
 // IDBOpenDBRequest mock.
+//TODO:
 class IDBOpenDBRequest extends EventTarget {
     // Construct.
     constructor(dbName, version) {
@@ -583,6 +588,7 @@ class IDBOpenDBRequest extends EventTarget {
 }
 
 // IDBObjectStore mock.
+//TODO:
 class IDBObjectStore {
     // Construct.
     constructor(transaction, storeName) {
@@ -861,6 +867,7 @@ class IDBObjectStore {
 }
 
 // IDBIndex mock.
+//TODO:
 class IDBIndex {
     // Construct.
     constructor(store, indexName) {
@@ -988,6 +995,7 @@ class IDBIndex {
 }
 
 // IDBCursor mock.
+//TODO:
 class IDBCursor {
     // Construct.
     constructor(request, range = undefined, direction = 'next', withValue = false) {
@@ -1181,6 +1189,7 @@ class IDBCursor {
 }
 
 // IDBCursorWithValue mock.
+//TODO:
 class IDBCursorWithValue extends IDBCursor {
     // Construct.
     constructor(request, range = undefined, direction = 'next') {
@@ -1272,6 +1281,7 @@ IDBKeyRange.upperBound = function(value, open = false) {
 }
 
 // IDBVersionChangeEvent mock.
+
 class IDBVersionChangeEvent extends Event {
     // Construct.
     constructor(name, oldVersion, newVersion) {
@@ -1312,7 +1322,6 @@ class DOMException extends Error {
 }
 
 // Functions.
-|
 // Reset data.
 function reset() {
     // Delete everything.
