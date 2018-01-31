@@ -1,5 +1,5 @@
 {
-    "name": "indexeddb",
+    "name": "indexedbdeitor",
     "version": "1.0.0",
     "description": "A little experiment to make a library that allow you to use indexedDB as storage source for your front-end app",
     "main": "index.js",
