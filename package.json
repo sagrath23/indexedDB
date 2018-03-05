@@ -6,6 +6,7 @@
     "scripts": {
         "build": "webpack",
         "test": "jest --coverage",
+        "test-with-coverage": "jest --coverage && cat ./coverage/lcov.info | codacy-coverage --accountToken 08ffa1b849194fb5a23c735b6187f2f1 --username sagrath23 --projectName indexedDB",
         "watch": "jest --watchAll --no-watchman"
     },
     "repository": {
@@ -29,13 +30,12 @@
     "devDependencies": {
         "@types/jest": "^21.1.5",
         "@types/node": "~6.0.60",
-        "@types/puppeteer": "^0.13.6",
         "awesome-typescript-loader": "^3.1.3",
         "babel-core": "^6.26.0",
         "babel-jest": "^21.2.0",
         "babel-preset-env": "^1.6.1",
+        "codacy-coverage": "^2.1.0",
         "jest": "^21.2.1",
-        "puppeteer": "^0.12.0",
         "shelving-mock-indexeddb": "^1.0.7",
         "source-map-loader": "^0.2.1",
         "ts-jest": "^21.1.4",
