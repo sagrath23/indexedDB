@@ -5,8 +5,9 @@
     "main": "index.js",
     "scripts": {
         "build": "webpack",
-        "test": "jest --coverage",
-        "test-with-coverage": "jest --coverage && cat ./coverage/lcov.info | codacy-coverage --accountToken 08ffa1b849194fb5a23c735b6187f2f1 --username sagrath23 --projectName indexedDB",
+        "test": "jest --watchAll",
+        "coverage": "jest --coverage --coverageReporters=lcov",
+        "test-with-coverage": "yarn coverage && cat ./coverage/lcov.info | codacy-coverage --language typescript --accountToken 7Fe1Hm9mMSJeuaS3V1NZ --username sagrath23 --projectName indexedDB",
         "watch": "jest --watchAll --no-watchman"
     },
     "repository": {
